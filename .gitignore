@@ -1,0 +1,12 @@
+*.vos
+*.vok
+*.hi
+*.o
+*.aux
+*.vo
+*.glob
+input
+output
+
+# Extracted from Coq
+day1/Day1.hs
