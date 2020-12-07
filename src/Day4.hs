@@ -5,18 +5,16 @@
 
 module Day4 where
 
+import Common
+
 import Text.Parsec
 import Text.Parsec.Char as CharP
 import qualified Data.Map as Map
 import Data.Map (Map)
-import System.Exit (die)
-import Data.Function ((&))
-import Control.Monad (guard, void)
 import Text.Read (readMaybe)
 import Data.Maybe
-import Data.Functor ((<&>))
+import Data.Functor ((<&>), void)
 import Data.Char
-import Data.Bifunctor
 
 type Document = Map String String
 
@@ -70,9 +68,7 @@ isValid doc = all (maybe False id) $
       (numStr, "in") -> intBetween 59 76 numStr
       _ -> False
 
-solve
-  :: String -- ^ Contents of input file
-  -> IO ()
+solve :: Solution
 solve input = do
   docs <- case parse batchFileP "input" input of
     Left err -> error (show err)

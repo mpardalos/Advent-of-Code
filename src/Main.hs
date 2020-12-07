@@ -3,14 +3,14 @@
 {-# LANGUAGE LambdaCase #-}
 module Main where
 
-import qualified Day4
-import qualified Day5
 import Text.Read (readMaybe)
 import System.Environment (getArgs)
 import System.Exit (ExitCode(ExitFailure), exitWith)
 import System.Directory (doesFileExist)
 
-type Solution = String -> IO ()
+import Common
+import qualified Day4
+import qualified Day5
 
 unsolved :: Solution
 unsolved _ = putStrLn "There is no solution for this problem"

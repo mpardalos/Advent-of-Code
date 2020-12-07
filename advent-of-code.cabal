@@ -12,6 +12,7 @@ executable aoc
   hs-source-dirs: src
   main-is: Main.hs
   other-modules:
+    Common
     Day4
     Day5
   build-depends:

@@ -1,11 +1,10 @@
 module Day5 where
 
-import Data.Functor ((<&>))
-import Data.Bifunctor (first, bimap)
-import Debug.Trace
-import GHC.IO
+import Common
+
 import Data.List
 import Data.Function ((&))
+import Data.Bifunctor
 
 type Row = Int
 type Column = Int
@@ -63,10 +62,10 @@ findMissing =
   . filter (\(x,y) -> y /= (x+1))
   . pairs
 
-solve :: String -> IO ()
+solve :: Solution
 solve = solve2
 
-solve1 :: String -> IO ()
+solve1 :: Solution
 solve1 input =
   lines input
   & fmap parseBoardingPass
@@ -75,7 +74,7 @@ solve1 input =
   & maximum
   & print
 
-solve2 :: String -> IO ()
+solve2 :: Solution
 solve2 input =
   lines input
   & fmap parseBoardingPass
