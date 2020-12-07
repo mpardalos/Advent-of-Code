@@ -11,6 +11,7 @@ import System.Directory (doesFileExist)
 import Common
 import qualified Day4
 import qualified Day5
+import qualified Day6
 
 unsolved :: Solution
 unsolved _ = putStrLn "There is no solution for this problem"
@@ -19,6 +20,7 @@ solutionFor :: Int -> Solution
 solutionFor 1 = \_ -> putStrLn "Use the Makefile in Day1/"
 solutionFor 4 = Day4.solve
 solutionFor 5 = Day5.solve
+solutionFor 6 = Day6.solve
 solutionFor _ = unsolved
 
 usage :: IO ()
