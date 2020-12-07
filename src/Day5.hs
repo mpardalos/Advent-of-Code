@@ -1,3 +1,5 @@
+module Day5 where
+
 import Data.Functor ((<&>))
 import Data.Bifunctor (first, bimap)
 import Debug.Trace
@@ -61,25 +63,24 @@ findMissing =
   . filter (\(x,y) -> y /= (x+1))
   . pairs
 
-main = problem2Main
+solve :: String -> IO ()
+solve = solve2
 
-problem1Main :: IO ()
-problem1Main =
-  readFile "input"
-  <&> lines
-  <&> fmap parseBoardingPass
-  <&> fmap decodeBoardingPass
-  <&> fmap seatId
-  <&> maximum
-  >>= print
+solve1 :: String -> IO ()
+solve1 input =
+  lines input
+  & fmap parseBoardingPass
+  & fmap decodeBoardingPass
+  & fmap seatId
+  & maximum
+  & print
 
-problem2Main :: IO ()
-problem2Main =
-  readFile "input"
-  <&> lines
-  <&> fmap parseBoardingPass
-  <&> fmap decodeBoardingPass
-  <&> fmap seatId
-  <&> sort
-  <&> findMissing
-  >>= print
+solve2 :: String -> IO ()
+solve2 input =
+  lines input
+  & fmap parseBoardingPass
+  & fmap decodeBoardingPass
+  & fmap seatId
+  & sort
+  & findMissing
+  & print

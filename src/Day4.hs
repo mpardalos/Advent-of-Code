@@ -3,6 +3,8 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE DuplicateRecordFields #-}
 
+module Day4 where
+
 import Text.Parsec
 import Text.Parsec.Char as CharP
 import qualified Data.Map as Map
@@ -68,15 +70,11 @@ isValid doc = all (maybe False id) $
       (numStr, "in") -> intBetween 59 76 numStr
       _ -> False
 
-
-main :: IO ()
-main = do
-  input <- readFile "input"
+solve
+  :: String -- ^ Contents of input file
+  -> IO ()
+solve input = do
   docs <- case parse batchFileP "input" input of
-    Left err -> die (show err)
+    Left err -> error (show err)
     Right docs -> pure docs
-
-  putStrLn "---"
-  mapM_ print docs
-  putStrLn "---"
   putStr "Result: "; print (length (filter isValid docs))

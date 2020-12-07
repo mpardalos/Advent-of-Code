@@ -1,3 +1,6 @@
+# Extracted from Coq
+day1/Day1.hs
+
 *.vos
 *.vok
 *.hi
@@ -7,6 +10,4 @@
 *.glob
 input
 output
-
-# Extracted from Coq
-day1/Day1.hs
+/dist-newstyle/
