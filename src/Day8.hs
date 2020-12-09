@@ -62,7 +62,8 @@ solve input =
   & map parseInstr
   & runUntilLoop
   & (`execState` ProgramState 0 0 [])
-  & print
+  & pc
+  & printf "Solution: %d\n"
 
 --- Extras
 
