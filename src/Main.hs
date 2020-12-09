@@ -12,6 +12,7 @@ import Common
 import qualified Day4
 import qualified Day5
 import qualified Day6
+import qualified Day8
 
 unsolved :: Solution
 unsolved _ = putStrLn "There is no solution for this problem"
@@ -21,10 +22,14 @@ solutionFor 1 = \_ -> putStrLn "Use the Makefile in Day1/"
 solutionFor 4 = Day4.solve
 solutionFor 5 = Day5.solve
 solutionFor 6 = Day6.solve
+solutionFor 8 = Day8.solve
 solutionFor _ = unsolved
 
 usage :: IO ()
 usage = putStrLn "Usage: aoc2020 <day> [input_file]"
+
+fileDoesNotExist :: String -> IO ()
+fileDoesNotExist fn = putStrLn ("File does not exist: " ++ fn)
 
 dayInput :: Int -> String
 dayInput n = "inputs/day" ++ show n
@@ -36,7 +41,7 @@ parseArgs ((readMaybe @Int -> Just day):rest) =
         [] -> dayInput day
   in doesFileExist inputPath >>= \case
     True -> return (day, inputPath)
-    False -> usage >> exitWith (ExitFailure 1)
+    False -> fileDoesNotExist inputPath >> exitWith (ExitFailure 1)
 parseArgs _ = usage >> exitWith (ExitFailure 1)
 
 main :: IO ()
