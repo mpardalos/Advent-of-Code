@@ -1,3 +1,6 @@
+{-# LANGUAGE RankNTypes #-}
+{-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE ConstraintKinds #-}
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE ViewPatterns #-}
 {-# LANGUAGE OverloadedLists #-}
@@ -6,10 +9,13 @@ module Day8 where
 
 import Common
 import Data.Function
-import Text.Read
-import Debug.Trace
+import Text.Read (readMaybe)
 import Data.Set (Set)
 import qualified Data.Set as Set
+import Control.Monad.State
+import Control.Monad.Writer
+import Text.Printf
+
 type Program = [Instruction]
 
 data Instruction
@@ -25,18 +31,20 @@ data ProgramState = ProgramState
   }
   deriving Show
 
-runInstr :: ProgramState -> Instruction -> ProgramState
-runInstr st Nop = st
-runInstr st (Jmp p) = st { pc = pc st + p }
-runInstr st (Acc v) = st { pc = pc st + 1, acc = acc st + v }
+type MonadRun m = MonadState ProgramState m
 
-runUntilLoop :: ProgramState -> Program -> ProgramState
-runUntilLoop st@ProgramState {pc, acc, visited} prog =
-  if pc `elem` visited then st
-  else let st' = st {visited = Set.insert pc visited}
-  in case prog `at` pc of
-    Just instr -> runUntilLoop (runInstr st' instr) prog
-    Nothing -> error ("Instruction " ++ show pc ++ " does not exist")
+runInstr :: MonadRun m => Instruction -> m ()
+runInstr Nop = modify $ \st -> st { pc = pc st + 1 }
+runInstr (Jmp p) = modify $ \st -> st {pc = pc st + p}
+runInstr (Acc v) = modify $ \st -> st { pc = pc st + 1, acc = acc st + v }
+
+runUntilLoop :: MonadRun m => Program -> m ()
+runUntilLoop prog = do
+  ProgramState{pc,visited} <- get
+  unless (pc `elem` visited) $ do
+    modify (\st -> st {visited = Set.insert pc visited})
+    runInstr (prog !! pc)
+    runUntilLoop prog
 
 readInt :: String -> Maybe Int
 readInt ('+':s) = readMaybe s
@@ -52,5 +60,39 @@ solve :: Solution
 solve input =
   lines input
   & map parseInstr
-  & runUntilLoop (ProgramState 0 0 [])
+  & runUntilLoop
+  & (`execState` ProgramState 0 0 [])
   & print
+
+--- Extras
+
+visualize :: Extra
+visualize input =
+  lines input
+  & map parseInstr
+  & runUntilLoopViz
+  & (`runStateT` ProgramState 0 0 [])
+  & execWriter
+  & \outLines -> do
+    putStrLn "--Execution trace--"
+    putStrLn "[  acc ]   pc: instruction"
+    putStrLn "--------------------------"
+    mapM_ putStrLn outLines
+
+type MonadViz m = (MonadRun m, MonadWriter [String] m)
+
+runUntilLoopViz :: forall m. MonadViz m => Program -> m ()
+runUntilLoopViz prog = do
+  ProgramState{acc,pc,visited} <- get
+  tellState
+  unless (pc `elem` visited) $ do
+    modify (\st -> st {visited = Set.insert pc visited})
+    runInstr (prog !! pc)
+    runUntilLoopViz prog
+  where
+    tellState = do
+      ProgramState {acc, pc} <- get
+      tell [printf "[%5d ] %4d: %s" acc pc (show $ prog !! pc)]
+
+extras :: Extras
+extras = [("trace", visualize)]
