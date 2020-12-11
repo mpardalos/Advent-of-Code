@@ -62,9 +62,6 @@ findMissing =
   . filter (\(x,y) -> y /= (x+1))
   . pairs
 
-solve :: Solution
-solve = solve2
-
 solve1 :: Solution
 solve1 input =
   lines input

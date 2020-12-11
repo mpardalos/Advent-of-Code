@@ -15,3 +15,6 @@ at :: [a] -> Int -> Maybe a
 at [] _ = Nothing
 at (x:xs) 0 = Just x
 at (x:xs) n = at xs (n-1)
+
+slice :: Int -> Int -> [Int] -> [Int]
+slice start end = drop start . take end

@@ -12,73 +12,71 @@ import qualified Day4
 import qualified Day5
 import qualified Day6
 import qualified Day8
-import System.Directory (doesFileExist)
-import System.Environment (getArgs)
-import System.Exit (ExitCode (ExitFailure), exitWith)
-import Text.Parsec
-import Text.Read (readMaybe)
-import Data.Maybe
-import Control.Monad
-import Data.List
-import Text.Parsec.Error (errorMessages)
+
 import qualified Data.Map as Map
+import qualified Options.Applicative as Opt
+import Control.Applicative
+import Data.Maybe
 
 unsolved :: Solution
 unsolved _ = putStrLn "There is no solution for this problem"
 
-solutionFor :: Int -> Solution
-solutionFor 1 = \_ -> putStrLn "Use the Makefile in Day1/"
-solutionFor 4 = Day4.solve
-solutionFor 5 = Day5.solve
-solutionFor 6 = Day6.solve
-solutionFor 8 = Day8.solve
-solutionFor _ = unsolved
+data Part = Part1 | Part2
+newtype Day = Day Int
+dayNum (Day n) = n
 
-extrasFor :: Int -> Extras
-extrasFor 8 = Day8.extras
+solutionFor :: Day -> Part -> Solution
+solutionFor (Day 1) _ = \_ -> putStrLn "Use the Makefile in Day1/"
+solutionFor (Day 4) Part2 = Day4.solve
+
+solutionFor (Day 5) Part1 = Day5.solve1
+solutionFor (Day 5) Part2 = Day5.solve2
+
+solutionFor (Day 6) Part1 = Day6.solve1
+solutionFor (Day 6) Part2 = Day6.solve2
+
+solutionFor (Day 8) Part1 = Day8.solve1
+solutionFor (Day 8) Part2 = Day8.solve2
+
+solutionFor _ _ = unsolved
+
+extrasFor :: Day -> Extras
+extrasFor (Day 8) = Day8.extras
 extrasFor _ = Map.empty
 
+
 usage :: IO ()
-usage = putStrLn "Usage: aoc2020 <day> [input_file]"
+usage = putStrLn "Usage: aoc2020 <day> [input_file] [args...]"
 
 fileDoesNotExist :: String -> IO ()
 fileDoesNotExist fn = putStrLn ("File does not exist: " ++ fn)
 
-type ArgParser = Parsec [String] ()
-
 data Args = Args
-  { day :: Int,
-    inputFile :: String,
-    method :: Maybe String
+  { day :: Day
+  , part :: Part
+  , specifiedInputFile :: Maybe String
+  , method :: Maybe String
   }
+inputFile Args{..} = fromMaybe (dayInput day) specifiedInputFile
+dayInput (Day n) = "inputs/day" ++ show n
 
-argsP :: ArgParser Args
-argsP = do
-  Just day <- readMaybe @Int <$> arg
-  method <- optionMaybe (try (arg `matching` stripPrefix "--"))
-  inputFile <- arg `orDefault` dayInput day
-
-  return Args{..}
-  where
-    arg = anyToken
-    p `orDefault` def = fromMaybe def <$> optionMaybe p
-    dayInput n = "inputs/day" ++ show n
-    matching p f = f <$> p >>= \case
-      Just val -> pure val
-      Nothing -> fail ""
-
-parseArgs = runParser argsP () "args"
+args :: Opt.Parser Args
+args = Args
+  <$> (Day <$> Opt.argument Opt.auto (Opt.metavar "DAY"))
+  <*> ( Opt.flag' Part1 (Opt.short '1')
+        <|> Opt.flag' Part2 (Opt.short '2')
+      )
+  <*> optional (Opt.strOption (Opt.metavar "FILE" <> Opt.short 'i' <> Opt.long "input"))
+  <*> optional (Opt.strOption (Opt.short 'm' <> Opt.long "method"))
 
 main :: IO ()
 main = do
-  Args {..} <- (parseArgs <$> getArgs) >>= \case
-    Right args -> pure args
-    Left err -> usage >> exitWith (ExitFailure 1)
+  args <- Opt.execParser (Opt.info (args <**> Opt.helper) Opt.idm)
 
-  inputContents <- readFile inputFile
+  inputContents <- readFile (inputFile args)
 
-  case method of
-    Nothing -> solutionFor day inputContents
-    Just method -> case Map.lookup method (extrasFor day) of
+  case method args of
+    Nothing -> solutionFor (day args) (part args) inputContents
+    Just method -> case Map.lookup method (extrasFor (day args)) of
       Just extra -> extra inputContents
-      Nothing -> putStrLn ("There is no " ++ method ++ " method for day " ++ show day)
+      Nothing -> putStrLn ("There is no " ++ method ++ " method for day " ++ show (dayNum (day args)))

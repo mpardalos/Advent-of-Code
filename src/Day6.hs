@@ -6,8 +6,6 @@ import Data.List.Split
 import Data.List
 import qualified Data.Set as Set
 
-solve = solve2
-
 solve2 :: Solution
 solve2 input =
   lines input

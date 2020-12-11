@@ -68,14 +68,14 @@ parseInstr s = error ("Invalid instruction: " ++ s)
 parseProgram :: String -> Program
 parseProgram = map parseInstr . lines
 
-solve :: Solution
-solve input =
+solve1 :: Solution
+solve1 input =
   lines input
   & map parseInstr
   & run
   & (`execState` initProgramState)
   & acc
-  & printf "Solution: %d\n"
+  & printf "Solution 1: %d\n"
 
 --- Part 2
 
@@ -95,7 +95,7 @@ solve2 input =
     filter fst results
     & (!!0)
     & (\(_, ProgramState{acc}) -> acc)
-    & printf "Solution: %d\n"
+    & printf "Solution 2: %d\n"
 
 --- Extras
 
@@ -129,4 +129,4 @@ runUntilLoopViz prog = do
       tell ([printf "[%5d ] %4d: %s" acc pc (show $ prog !! pc)]::[String])
 
 extras :: Extras
-extras = [("trace", visualize . parseProgram), ("p2", solve2)]
+extras = [("trace", visualize . parseProgram)]
