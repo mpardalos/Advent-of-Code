@@ -16,6 +16,7 @@ executable aoc
     Day5
     Day6
     Day8
+    Day9
   build-depends:
     base >=4.13 && <4.15, parsec, containers, directory, split, mtl, optparse-applicative
   default-language:    Haskell2010
