@@ -13,6 +13,7 @@ import qualified Day5
 import qualified Day6
 import qualified Day8
 import qualified Day9
+import qualified Day10
 
 import qualified Data.Map as Map
 import qualified Options.Applicative as Opt
@@ -41,6 +42,9 @@ solutionFor (Day 8) Part2 = Day8.solve2
 
 solutionFor (Day 9) Part1 = Day9.solve1
 solutionFor (Day 9) Part2 = Day9.solve2
+
+solutionFor (Day 10) Part1 = Day10.solve1
+solutionFor (Day 10) Part2 = Day10.solve2
 solutionFor _ _ = unsolved
 
 extrasFor :: Day -> Extras
