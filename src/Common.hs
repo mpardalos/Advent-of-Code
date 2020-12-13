@@ -31,3 +31,11 @@ untilFixed f val =
     if val == val'
     then val
     else untilFixed f val'
+
+next :: (Enum a, Bounded a, Eq a) => a -> a
+next x | x == maxBound = minBound
+       | otherwise = succ x
+
+prev :: (Enum a, Bounded a, Eq a) => a -> a
+prev x | x == minBound = maxBound
+       | otherwise = pred x

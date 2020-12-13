@@ -20,6 +20,7 @@ executable aoc
     Day9
     Day10
     Day11
+    Day12
   build-depends:
     base >=4.13 && <4.15, parsec, containers, directory, split, mtl, optparse-applicative,
     vty
