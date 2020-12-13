@@ -8,6 +8,7 @@ build-type:          Simple
 extra-source-files:  CHANGELOG.md
 
 executable aoc
+  ghc-options: -threaded
   hs-source-dirs: src
   main-is: Main.hs
   other-modules:
@@ -18,6 +19,8 @@ executable aoc
     Day8
     Day9
     Day10
+    Day11
   build-depends:
-    base >=4.13 && <4.15, parsec, containers, directory, split, mtl, optparse-applicative
+    base >=4.13 && <4.15, parsec, containers, directory, split, mtl, optparse-applicative,
+    vty
   default-language:    Haskell2010

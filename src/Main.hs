@@ -14,6 +14,7 @@ import qualified Day6
 import qualified Day8
 import qualified Day9
 import qualified Day10
+import qualified Day11
 
 import qualified Data.Map as Map
 import qualified Options.Applicative as Opt
@@ -45,10 +46,15 @@ solutionFor (Day 9) Part2 = Day9.solve2
 
 solutionFor (Day 10) Part1 = Day10.solve1
 solutionFor (Day 10) Part2 = Day10.solve2
+
+solutionFor (Day 11) Part1 = Day11.solve1
+solutionFor (Day 11) Part2 = Day11.solve2
+
 solutionFor _ _ = unsolved
 
 extrasFor :: Day -> Extras
 extrasFor (Day 8) = Day8.extras
+extrasFor (Day 11) = Day11.extras
 extrasFor _ = Map.empty
 
 
@@ -60,9 +66,8 @@ fileDoesNotExist fn = putStrLn ("File does not exist: " ++ fn)
 
 data Args = Args
   { day :: Day
-  , part :: Part
+  , partOrMethod :: Either Part String
   , specifiedInputFile :: Maybe String
-  , method :: Maybe String
   }
 inputFile Args{..} = fromMaybe (dayInput day) specifiedInputFile
 dayInput (Day n) = "inputs/day" ++ show n
@@ -70,11 +75,11 @@ dayInput (Day n) = "inputs/day" ++ show n
 args :: Opt.Parser Args
 args = Args
   <$> (Day <$> Opt.argument Opt.auto (Opt.metavar "DAY"))
-  <*> ( Opt.flag' Part1 (Opt.short '1')
-        <|> Opt.flag' Part2 (Opt.short '2')
+  <*> ( Opt.flag' (Left Part1) (Opt.short '1')
+        <|> Opt.flag' (Left Part2) (Opt.short '2')
+        <|> Right <$> Opt.strOption (Opt.short 'm' <> Opt.long "method")
       )
   <*> optional (Opt.strOption (Opt.metavar "FILE" <> Opt.short 'i' <> Opt.long "input"))
-  <*> optional (Opt.strOption (Opt.short 'm' <> Opt.long "method"))
 
 main :: IO ()
 main = do
@@ -82,8 +87,8 @@ main = do
 
   inputContents <- readFile (inputFile args)
 
-  case method args of
-    Nothing -> solutionFor (day args) (part args) inputContents
-    Just method -> case Map.lookup method (extrasFor (day args)) of
+  case partOrMethod args of
+    Left part -> solutionFor (day args) part inputContents
+    Right method -> case Map.lookup method (extrasFor (day args)) of
       Just extra -> extra inputContents
       Nothing -> putStrLn ("There is no " ++ method ++ " method for day " ++ show (dayNum (day args)))
