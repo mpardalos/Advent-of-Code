@@ -1,9 +1,14 @@
+{-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE TypeApplications #-}
+{-# LANGUAGE OverloadedLists #-}
+
 module Day12 where
 
 import Common
 import Debug.Trace
+import Graphics.Gloss
+import Data.Bifunctor
 
 type Distance = Int
 data Degrees = D90 | D180 | D270
@@ -43,15 +48,15 @@ data State = State
   deriving Show
 initState = State (0, 0) E
 
-rotate :: Degrees -> Direction -> Direction
-rotate D90 dir = next dir
-rotate D180 dir = next (next dir)
-rotate D270 dir = next (next (next dir))
+rotateCW :: Degrees -> Direction -> Direction
+rotateCW D90 dir = next dir
+rotateCW D180 dir = next (next dir)
+rotateCW D270 dir = next (next (next dir))
 
-rotateMinus :: Degrees -> Direction -> Direction
-rotateMinus D90 dir = prev dir
-rotateMinus D180 dir = prev (prev dir)
-rotateMinus D270 dir = prev (prev (prev dir))
+rotateCCW :: Degrees -> Direction -> Direction
+rotateCCW D90 dir = prev dir
+rotateCCW D180 dir = prev (prev dir)
+rotateCCW D270 dir = prev (prev (prev dir))
 
 applyInstruction :: State -> Instruction -> State
 applyInstruction st@(State pos@(pNorth, pEast) direction) =
@@ -60,8 +65,8 @@ applyInstruction st@(State pos@(pNorth, pEast) direction) =
     (Move E val) -> st { position = (pNorth, pEast+val) }
     (Move S val) -> st { position = (pNorth-val, pEast) }
     (Move W val) -> st { position = (pNorth, pEast-val) }
-    (L val) -> st { direction = rotateMinus val direction }
-    (R val) -> st { direction = rotate val direction }
+    (L val) -> st { direction = rotateCCW val direction }
+    (R val) -> st { direction = rotateCW val direction }
     (F val) -> applyInstruction st (Move direction val)
 
 solve1 :: Solution
@@ -107,4 +112,43 @@ solve2 =
   . shipPosition
   . foldl (\s i -> (show s ++ " | " ++ show i) `trace` applyInstructionP2 s i) initStateP2
   . readInput
-  -- $ unlines ["F10", "N3", "F7", "R90", "F11"]
+visualize1 input =
+  simulate
+    (InWindow "Day 12" (1280, 720) (0, 0))
+    cyan
+    2
+    (Blank, 0, initStateP2)
+    (\(img, _, s) -> img)
+    (\_ _ -> step)
+  where
+    instructions = readInput input
+
+    draw :: StateP2 -> StateP2 -> Picture
+    draw (StateP2 lastShipPos _) (StateP2 thisShipPos thisWaypointPos)  =
+      drawShipLine lastShipPos thisShipPos
+      <> drawShip thisShipPos
+      <> drawWaypoint thisShipPos thisWaypointPos
+
+    drawShip (x, y) = translate (fromIntegral x) (fromIntegral y) (thickCircle 10 20)
+
+    drawWaypoint (sX, sY) (wX, wY) =
+      translate (fromIntegral (sX + 5*wX)) (fromIntegral (sY+5*wY))
+      $ color red
+      $ thickCircle 5 10
+
+    drawShipLine lastPos thisPos =
+      color red
+      $ line
+      $ map (bimap fromIntegral fromIntegral)
+      $ [lastPos, thisPos]
+
+    step :: (Picture, Int, StateP2) -> (Picture, Int, StateP2)
+    step (img, ip, s) =
+      case instructions `atMay` ip of
+        Just instr ->
+          let s' = applyInstructionP2 s instr
+           in (img <> draw s s', ip + 1, s')
+        Nothing -> (img, ip, s)
+
+extras :: Extras
+extras = [("viz1", visualize1)]

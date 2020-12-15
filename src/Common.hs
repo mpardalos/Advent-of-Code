@@ -39,3 +39,9 @@ next x | x == maxBound = minBound
 prev :: (Enum a, Bounded a, Eq a) => a -> a
 prev x | x == minBound = maxBound
        | otherwise = pred x
+
+atMay :: [a] -> Int -> Maybe a
+atMay [] _ = Nothing
+atMay (x:_) 0 = Just x
+atMay (_:xs) n | n < 0 = Nothing
+               | otherwise = atMay xs (n-1)
