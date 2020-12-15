@@ -16,6 +16,7 @@ import qualified Day9
 import qualified Day10
 import qualified Day11
 import qualified Day12
+import qualified Day13
 
 import qualified Data.Map as Map
 import qualified Options.Applicative as Opt
@@ -53,6 +54,9 @@ solutionFor (Day 11) Part2 = Day11.solve2
 
 solutionFor (Day 12) Part1 = Day12.solve1
 solutionFor (Day 12) Part2 = Day12.solve2
+
+solutionFor (Day 13) Part1 = Day13.solve1
+solutionFor (Day 13) Part2 = Day13.solve2
 
 solutionFor _ _ = unsolved
 
