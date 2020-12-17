@@ -68,6 +68,7 @@ extrasFor :: Day -> Extras
 extrasFor (Day 8) = Day8.extras
 extrasFor (Day 11) = Day11.extras
 extrasFor (Day 12) = Day12.extras
+extrasFor (Day 14) = Day14.extras
 extrasFor _ = Map.empty
 
 

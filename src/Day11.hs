@@ -129,27 +129,11 @@ solve2 = print @Int . sum @[] . map (count Occupied) . untilFixed stepP2 . readB
 -- Visualization
 
 visualizeForStep :: (Board -> Board) -> Extra
-visualizeForStep stepFun (readBoard -> board) = do
-  vty <- mkVty =<< standardIOConfig
-  mainLoop vty board
+visualizeForStep stepFun (readBoard -> board) =
+  mainLoop stepFun showBoard board
   where
-    mainLoop :: Vty -> Board -> IO ()
-    mainLoop vty b = do
-      update vty (picForImage $ vertCat $ map (string mempty) (showBoard b))
-      done <- waitForKey vty
-      if done
-        then shutdown vty
-        else mainLoop vty (stepFun b)
-
-    showBoard :: Board -> [String]
-    showBoard = map (concatMap show)
-
-    -- | Returns true when we should exit
-    waitForKey :: Vty -> IO Bool
-    waitForKey vty = nextEvent vty >>= \case
-      EvKey (KChar 'q') _ -> return True
-      EvKey _ _ -> return False
-      _ -> waitForKey vty
+    showBoard :: Board -> Image
+    showBoard = vertCat . map (string mempty . concatMap show)
 
 extras :: Extras
 extras = [("viz1", visualizeForStep stepP1), ("viz2", visualizeForStep stepP2)]

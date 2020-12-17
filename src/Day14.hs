@@ -1,4 +1,6 @@
 {-# LANGUAGE TypeApplications #-}
+{-# LANGUAGE OverloadedLists #-}
+
 module Day14 where
 
 import Text.Parsec
@@ -9,6 +11,10 @@ import Common
 import Debug.Trace
 import Data.IntMap (IntMap)
 import qualified Data.IntMap as IntMap
+import Text.Printf
+import Data.Foldable
+import Graphics.Vty (Image, vertCat, (<->))
+import qualified Graphics.Vty as Vty
 
 type Addr = Int
 type Value = Int
@@ -20,7 +26,10 @@ type Mask = [MaskBit]
 data Instruction
   = Write Addr Value
   | Mask Mask
-  deriving Show
+
+instance Show Instruction where
+  show (Write addr val) = printf "mem[0x%X] = 0x%X" addr val
+  show (Mask mask) = printf "mask = %s" (concatMap show mask)
 
 readInput :: String -> [Instruction]
 readInput = either (error . show) id . runParser parser () ""
@@ -96,3 +105,34 @@ solve2 =
   . snd
   . foldl runInstruction2 ([], IntMap.empty)
   . readInput
+
+
+-- Visualize
+
+type MemState = (Mask, Memory)
+
+imageForState :: MemState -> Image
+imageForState (mask, memory) =
+  vertCat
+    (Vty.string mempty (printf "mask: %s" (concatMap show mask))
+     : IntMap.elems (IntMap.map (Vty.string mempty)
+                     (IntMap.mapWithKey (printf "[0x%X] = 0x%X") memory)))
+
+viz2 :: Extra
+viz2 input =
+  mainLoop nextIP showState 0
+  where
+    instrs = readInput input
+
+    states = scanl runInstruction2 ([], IntMap.empty) instrs
+
+    showState n =
+      Vty.string mempty (show (instrs !! n))
+      <->
+      imageForState (states !! n)
+
+    nextIP n | n == (length states - 1) = n
+             | otherwise = n+1
+
+extras :: Extras
+extras = [("viz2", viz2)]

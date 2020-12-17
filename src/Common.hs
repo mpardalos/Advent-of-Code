@@ -1,9 +1,12 @@
+{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE FlexibleContexts #-}
 module Common where
 
 import Data.Map (Map)
 import Text.Parsec
 import Data.Functor.Identity
+import Graphics.Vty
+import qualified Graphics.Vty as Vty
 
 type Solution = String -> IO ()
 
@@ -45,3 +48,21 @@ atMay [] _ = Nothing
 atMay (x:_) 0 = Just x
 atMay (_:xs) n | n < 0 = Nothing
                | otherwise = atMay xs (n-1)
+
+mainLoop :: (s -> s) -> (s -> Image) -> s -> IO ()
+mainLoop step display state =
+  innerLoop =<< mkVty =<< standardIOConfig
+  where
+    innerLoop vty = do
+      update vty (picForImage $ display state)
+      done <- waitForKey vty
+      if done
+        then shutdown vty
+        else mainLoop step display (step state)
+
+-- | Returns true when we should exit
+waitForKey :: Vty -> IO Bool
+waitForKey vty = nextEvent vty >>= \case
+  EvKey (KChar 'q') _ -> return True
+  EvKey _ _ -> return False
+  _ -> waitForKey vty
